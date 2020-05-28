@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
-* Студент: [Поплетеева Мария](https://up.htmlacademy.ru/javascript/20/user/1325739).
-* Наставник: `Неизвестно`.
+- Студент: [Поплетеева Мария](https://up.htmlacademy.ru/javascript/20/user/1325739).
+- Наставник: [Раиль Сахавиев](https://htmlacademy.ru/profile/id1331891).
 
 ---
 
