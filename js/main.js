@@ -1,108 +1,105 @@
 "use strict";
 
-var numPool = [1, 2, 3, 4, 5, 6, 7, 8];
-var titlePool = ["Гнездышко", "Уютное убежище", "Твой рай"];
-var housePool = ["palace", "flat", "house", "bungalo"];
-var checkPool = ["12:00", "13:00", "14:00"];
-var descriptionPool = ["Очень красиво!", "Очень хорошо!", "Очень чисто!"];
+var titles = ["Гнездышко", "Уютное убежище", "Твой рай"];
+var hotelTypes = ["palace", "flat", "house", "bungalo"];
+var times = ["12:00", "13:00", "14:00"];
+var descriptions = ["Очень красиво!", "Очень хорошо!", "Очень чисто!"];
+var images = [
+  "http://o0.github.io/assets/images/tokyo/hotel1.jpg",
+  "http://o0.github.io/assets/images/tokyo/hotel2.jpg",
+  "http://o0.github.io/assets/images/tokyo/hotel3.jpg",
+];
+var features = [
+  "wifi",
+  "dishwasher",
+  "parking",
+  "washer",
+  "elevator",
+  "conditioner",
+];
+var PIN_IMG_WIDTH = 40;
+var PIN_IMG_HEIGHT = 40;
 
-var getAvatar = function (AvPool) {
-  return "0" + Math.floor(Math.random() * AvPool.length);
+var getRandomNumber = function (min, max) {
+  return min + Math.ceil(Math.random() * (max - min));
 };
 
-var getPart = function (poolName) {
-  var randеTitle = Math.floor(Math.random() * poolName.length);
-  return poolName[randеTitle];
+var getRandomInteger = function (min, array) {
+  var position = min + Math.ceil(Math.random() * (array.length - 1));
+  return array[position];
 };
 
-var getXY = function (minXY, maxXY) {
-  return Math.floor(Math.random() * (maxXY - minXY + 1)) + minXY;
+var getDifMassive = function (pool) {
+  var myPool = pool.slice();
+  myPool.length = Math.floor(Math.random() * (myPool.length - 1)) + 1;
+  return myPool;
 };
 
-var getImg = function () {
-  var imgPool = [
-    "http://o0.github.io/assets/images/tokyo/hotel1.jpg",
-    "http://o0.github.io/assets/images/tokyo/hotel2.jpg",
-    "http://o0.github.io/assets/images/tokyo/hotel3.jpg",
-  ];
-  imgPool.length = Math.floor(Math.random() * (imgPool.length - 1)) + 1;
-  return imgPool;
-}; // генерируем случайную длину массива для фото
+var generateHotels = function (amount) {
+  var first = Array(); // генерируем объединенный массив из n-amount объектов
+  for (var i = 0; i < amount; i++) {
+    var author = {
+      avatar: "img/avatars/user" + "0" + getRandomNumber(1, 8) + ".png",
+    };
 
-var getFts = function () {
-  var featuresPool = ["wifi", "dishwasher", "parking", "washer", "elevator", "conditioner"];
-  featuresPool.length = Math.floor(Math.random() * (featuresPool.length - 1)) + 1;
-  return featuresPool;
-}; // генерируем случайную длину массива для features
+    var offer = {
+      title: getRandomInteger(0, titles),
+      address:
+        getRandomNumber(1, window.innerWidth) + "," + getRandomNumber(130, 630),
+      price: getRandomNumber(0, 1000000),
+      type: getRandomInteger(0, hotelTypes),
+      rooms: getRandomNumber(1, 4),
+      guests: getRandomNumber(1, 4),
+      checkin: getRandomInteger(0, times),
+      checkout: getRandomInteger(0, times),
+      features: getDifMassive(features),
+      description: getRandomInteger(0, description),
+      photos: getDifMassive(images),
+    };
 
-function Author() {
-  this.avatar = "img/avatars/user" + getAvatar(numPool) + ".png";
-}
+    var location = {
+      x: getRandomNumber(1, window.innerWidth),
+      y: getRandomNumber(130, 630),
+    };
 
-function Offer() {
-  this.title = getPart(titlePool);
-  this.address = getXY(1, window.innerWidth) + "," + getXY(130, 630);
-  this.price = getXY(0, 1000000);
-  this.type = getPart(housePool);
-  this.rooms = getPart(numPool);
-  this.guests = getPart(numPool);
-  this.checkin = getPart(checkPool);
-  this.checkout = getPart(checkPool);
-  this.features = getFts();
-  this.description = getPart(descriptionPool);
-  this.photos = getImg();
-}
+    var full = {
+      // генерируем 1 объект
+      author: author,
+      offer: offer,
+      location: location,
+    };
 
-function Location() {
-  this.x = getXY(1, window.innerWidth);
-  this.y = getXY(130, 630);
-}
+    first[i] = full;
+    first.push(first[i]);
+  }
+  return first;
+};
 
-function Full() {
-  // генерируем  массив со всеми данными
-  this.author = new Author();
-  this.offer = new Offer();
-  this.location = new Location();
-}
+var hotels = generateHotels(7);
 
-// генерируем единый boss-массив c данными из 8 объектов
-var first = Array();
-for (var i = 0; i <= 6; i++) {
-  first[i] = new Full();
-  first.push(first[i]);
-}
-var oneMassive = first;
-console.log(oneMassive);
+var createPins = function (array) {
+  var fragment = document.createDocumentFragment(); //создаем новый фрагмент
+  for (var i = 0; i < array.length; i++) {
+    var newElement = document.createElement("button");
+    newElement.style ="left: " + array[i].location.x + "px;" + " " + "top: " + array[i].location.y + "px;";
+    newElement.className = "map__pin map__pin--main";
+    newElement.innerHTML = "<img/>";
+    newElement.querySelector("img").width = PIN_IMG_WIDTH;
+    newElement.querySelector("img").height = PIN_IMG_HEIGHT;
+    newElement.querySelector("img").src = array[i].author.avatar;
+    newElement.querySelector("img").alt = array[i].offer.type;
+
+    fragment.appendChild(newElement);
+  }
+  return fragment;
+};
+
+var mapPins = document.querySelector(".map__pins"); // находим блок для вставки меток
+mapPins.appendChild(createPins(hotels)); //отрисовка объектов
 
 var map = document.documentElement.querySelector(".map"); // нахожу блок карты
 map.classList.remove("map--faded"); //удаляю  .map--faded
 
-var placeMapPin = document.querySelector(".map__pins"); // находим блок для вставки меток
-var template = document.querySelector("#pin").content.querySelector("button");
-
-var fragment = document.createDocumentFragment(); //создаем новый фрагмент
-var createPins = function () {
-  for (var i = 0; i < oneMassive.length; i++) {
-    var newElement = document.createElement("button");
-    newElement.style =
-      "left: " +
-      oneMassive[i].location.x +
-      "px;" +
-      " " +
-      "top: " +
-      oneMassive[i].location.y +
-      "px;";
-    newElement.className = "map__pin map__pin--main";
-    newElement.innerHTML = "<img/>";
-    newElement.querySelector("img").width = "40";
-    newElement.querySelector("img").height = "44";
-    newElement.querySelector("img").draggable = "false";
-    newElement.querySelector("img").src = oneMassive[i].author.avatar;
-    newElement.querySelector("img").alt = oneMassive[i].offer.type;
-
-    fragment.appendChild(newElement);
-  }
-  createPins = fragment;
-};
-createPins();
-placeMapPin.appendChild(fragment); //отрисовка объектов
+var pinTemplate = document
+  .querySelector("#pin")
+  .content.querySelector("button");
