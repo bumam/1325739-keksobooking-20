@@ -9,24 +9,12 @@ var images = [
   "http://o0.github.io/assets/images/tokyo/hotel2.jpg",
   "http://o0.github.io/assets/images/tokyo/hotel3.jpg",
 ];
-var features = [
-  "wifi",
-  "dishwasher",
-  "parking",
-  "washer",
-  "elevator",
-  "conditioner",
-];
+var features = ["wifi", "dishwasher", "parking", "washer", "elevator", "conditioner"];
 var PIN_IMG_WIDTH = 40;
 var PIN_IMG_HEIGHT = 40;
 
 var getRandomNumber = function (min, max) {
   return min + Math.ceil(Math.random() * (max - min));
-};
-
-var getRandomInteger = function (min, array) {
-  var position = min + Math.ceil(Math.random() * (array.length - 1));
-  return array[position];
 };
 
 var getDifMassive = function (pool) {
@@ -36,70 +24,57 @@ var getDifMassive = function (pool) {
 };
 
 var generateHotels = function (amount) {
-  var first = Array(); // генерируем объединенный массив из n-amount объектов
+  var hotels = Array();
   for (var i = 0; i < amount; i++) {
-    var author = {
-      avatar: "img/avatars/user" + "0" + getRandomNumber(1, 8) + ".png",
+    var hotel = {
+      author: {
+        avatar: "img/avatars/user" + "0" + getRandomNumber(1, 8) + ".png",
+      },
+      offer: {
+        title: titles[getRandomNumber(0, titles.length)],
+        address: getRandomNumber(1, window.innerWidth) + "," + getRandomNumber(130, 630),
+        price: getRandomNumber(0, 1000000),
+        type: hotelTypes[getRandomNumber(0, hotelTypes.length)],
+        rooms: getRandomNumber(1, 4),
+        guests: getRandomNumber(1, 4),
+        checkin: times[getRandomNumber(0, times.length)],
+        checkout: times[getRandomNumber(0, times.length)],
+        features: getDifMassive(features),
+        description: description[getRandomNumber(0, description.length)],
+        photos: getDifMassive(images),
+      },
+      location: {
+        x: getRandomNumber(1, window.innerWidth),
+        y: getRandomNumber(130, 630),
+      },
     };
-
-    var offer = {
-      title: getRandomInteger(0, titles),
-      address:
-        getRandomNumber(1, window.innerWidth) + "," + getRandomNumber(130, 630),
-      price: getRandomNumber(0, 1000000),
-      type: getRandomInteger(0, hotelTypes),
-      rooms: getRandomNumber(1, 4),
-      guests: getRandomNumber(1, 4),
-      checkin: getRandomInteger(0, times),
-      checkout: getRandomInteger(0, times),
-      features: getDifMassive(features),
-      description: getRandomInteger(0, description),
-      photos: getDifMassive(images),
-    };
-
-    var location = {
-      x: getRandomNumber(1, window.innerWidth),
-      y: getRandomNumber(130, 630),
-    };
-
-    var full = {
-      // генерируем 1 объект
-      author: author,
-      offer: offer,
-      location: location,
-    };
-
-    first[i] = full;
-    first.push(first[i]);
+    hotels.push(hotel);
   }
-  return first;
+  return hotels;
 };
 
 var hotels = generateHotels(7);
 
-var createPins = function (array) {
-  var fragment = document.createDocumentFragment(); //создаем новый фрагмент
+function createPins(array) {
+  var fragment = document.createDocumentFragment();
   for (var i = 0; i < array.length; i++) {
-    var newElement = document.createElement("button");
-    newElement.style ="left: " + array[i].location.x + "px;" + " " + "top: " + array[i].location.y + "px;";
-    newElement.className = "map__pin map__pin--main";
-    newElement.innerHTML = "<img/>";
-    newElement.querySelector("img").width = PIN_IMG_WIDTH;
-    newElement.querySelector("img").height = PIN_IMG_HEIGHT;
-    newElement.querySelector("img").src = array[i].author.avatar;
-    newElement.querySelector("img").alt = array[i].offer.type;
+    var pin = document.createElement("button");
+    pin.style =
+      "left: " + array[i].location.x + "px;" + " " + "top: " + array[i].location.y + "px;";
+    pin.className = "map__pin map__pin--main";
+    pin.innerHTML = "<img/>";
+    pin.querySelector("img").width = PIN_IMG_WIDTH;
+    pin.querySelector("img").height = PIN_IMG_HEIGHT;
+    pin.querySelector("img").src = array[i].author.avatar;
+    pin.querySelector("img").alt = array[i].offer.type;
 
-    fragment.appendChild(newElement);
+    fragment.appendChild(pin);
   }
   return fragment;
-};
+}
 
-var mapPins = document.querySelector(".map__pins"); // находим блок для вставки меток
-mapPins.appendChild(createPins(hotels)); //отрисовка объектов
+var mapPins = document.querySelector(".map__pins");
+mapPins.appendChild(createPins(hotels));
 
-var map = document.documentElement.querySelector(".map"); // нахожу блок карты
-map.classList.remove("map--faded"); //удаляю  .map--faded
-
-var pinTemplate = document
-  .querySelector("#pin")
-  .content.querySelector("button");
+var map = document.documentElement.querySelector(".map");
+map.classList.remove("map--faded");
