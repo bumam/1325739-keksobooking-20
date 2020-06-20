@@ -97,6 +97,20 @@ function createPhotos(array) {
   return fragment;
 }
 
+function getTypeLabel(type) {
+  var typeLabel;
+  if (type === "flat") {
+    typeLabel = "Квартира";
+  } else if (type === "bungalo") {
+    typeLabel = "Бунгало";
+  } else if (type === "house") {
+    typeLabel = "Дом";
+  } else if (type === "palace") {
+    typeLabel = "Дворец";
+  }
+  return typeLabel;
+}
+
 function createCards(array) {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < array.length; i++) {
@@ -106,18 +120,7 @@ function createCards(array) {
     card.querySelector(".popup__title").textContent = offer.title;
     card.querySelector(".popup__text--address").textContent = offer.address;
     card.querySelector(".popup__text--price").textContent = offer.price + "₽/ночь";
-
-    function getTypeLabel(type) {
-      if (type === "bungalo") {
-        card.querySelector(".popup__type").textContent = "Бунгало";
-      } else if (type === "house") {
-        card.querySelector(".popup__type").textContent = "Дом";
-      } else if (type === "palace") {
-        card.querySelector(".popup__type").textContent = "Дворец";
-      }
-    }
-
-    getTypeLabel(offer.type);
+    card.querySelector(".popup__type").textContent = getTypeLabel(offer.type);
 
     card.querySelector(".popup__text--capacity").textContent =
       offer.rooms + " " + "комнаты для" + " " + offer.guests + " " + "гостей";
