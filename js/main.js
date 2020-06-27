@@ -10,6 +10,22 @@ var images = [
   "http://o0.github.io/assets/images/tokyo/hotel3.jpg",
 ];
 var features = ["wifi", "dishwasher", "parking", "washer", "elevator", "conditioner"];
+var map = document.documentElement.querySelector(".map");
+var form = document.documentElement.querySelector(".ad-form");
+var mapPins = document.querySelector(".map__pins");
+var cardTemplate = document.querySelector("#card").content;
+var before = document.querySelector(".map__filters-container");
+var parentDiv = before.parentNode;
+var allFieldset = document.querySelectorAll("fieldset");
+var mainPin = document.querySelector(".map__pin--main");
+var address = document.querySelector("#address");
+var price = document.querySelector("#price");
+var roomNumber = document.querySelector("#room_number");
+var capacity = document.querySelector("#capacity");
+var coordX = mainPin.offsetLeft
+var coordY = mainPin.offsetTop
+
+
 var PIN_IMG_WIDTH = 40;
 var PIN_IMG_HEIGHT = 40;
 var PHOTO_IMG_WIDTH = 45;
@@ -64,7 +80,7 @@ function createPins(array) {
   for (var i = 0; i < array.length; i++) {
     var pin = document.createElement("button");
     pin.style = "left: " + array[i].location.x + "px;" + " " + "top: " + array[i].location.y + "px;";
-    pin.className = "map__pin map__pin--main";
+    pin.className = "map__pin";
     pin.innerHTML = "<img/>";
     pin.querySelector("img").width = PIN_IMG_WIDTH;
     pin.querySelector("img").height = PIN_IMG_HEIGHT;
@@ -76,10 +92,6 @@ function createPins(array) {
   return fragment;
 }
 
-var mapPins = document.querySelector(".map__pins");
-
-
-var cardTemplate = document.querySelector("#card").content;
 
 function createPhotos(array) {
   var fragment = document.createDocumentFragment();
@@ -140,47 +152,31 @@ function createCards(array) {
   return fragment;
 }
 
-var before = document.querySelector(".map__filters-container");
-var parentDiv = before.parentNode;
-
-
-var allFieldset = document.querySelectorAll("fieldset");
-for (let oneFieldset of allFieldset) {
-  oneFieldset.setAttribute("disabled", "disabled");
-}
-
-var pinMain = document.querySelector(".map__pin--main");
-var address = document.querySelector("#address");
-address.setAttribute("value", "");
-
-var coordX = pinMain.offsetLeft;
-var coordY = pinMain.offsetTop;
-
 var setRoundPinLocation = function () {
   address.value = "x: " + (coordX - Math.round(PIN_IMG_SIZE / 2)) + ", y: " + (coordY - Math.round(PIN_IMG_SIZE / 2));
 }; // расчет координат конца пина до актиации страницы (круглый пин)
-setRoundPinLocation();
+
 
 var setPinLocation = function () {
   address.value = "x: " + (coordX - Math.round(PIN_IMG_SIZE / 2)) + ", y: " + (coordY - PIN_IMG_ACTIVE_HEIGHT);
 }; // расчет координат конца пина после актиации страницы и появления хвостика
 
-pinMain.addEventListener("mousedown", logMouseButton);
-pinMain.addEventListener("keydown", function (evt) {
-  if (evt.key === "Enter") {
-    evt.preventDefault();
-    activatePage();
+function deactivatePage() {
+  for (let oneFieldset of allFieldset) {
+    oneFieldset.setAttribute("disabled", "disabled");
   }
-});
+  address.setAttribute("value", "");
+  setRoundPinLocation();
 
-function logMouseButton(e) {
+}
+
+function logMouseButton(event) {
   if (event.which == 1) {
     activatePage();
   }
 }
 
-var map = document.documentElement.querySelector(".map");
-var form = document.documentElement.querySelector(".ad-form");
+
 
 function activatePage() {
   map.classList.remove("map--faded");
@@ -192,12 +188,16 @@ function activatePage() {
   setPinLocation();
   setPriceValidity();
   setGuestsLimit()
+
   mapPins.appendChild(createPins(hotels));
   parentDiv.insertBefore(createCards(hotels), before);
-}
+  hideOffer();
 
-var roomNumber = document.querySelector("#room_number");
-var capacity = document.querySelector("#capacity");
+  callPriceValidation();
+  callGuestsValidation();
+  callShowPins();
+  callTimeValidation();
+}
 
 
 function setGuestsLimit() {
@@ -234,16 +234,14 @@ function setGuestsLimit() {
   }
 
   if (roomValue === "100") {
-    for (var i = 0; i < capacity.children.length - 1; i++) {
+    for (var i = 0; i < capacity.children.length; i++) {
       capacity.children[i].disabled = true;
     }
     capacity.children[3].selected = true;
+    capacity.children[3].disabled = false;
   }
 };
 
-document.querySelector("#room_number").addEventListener("change", setGuestsLimit);
-
-var price = document.querySelector("#price");
 
 function setPriceValidity() {
   var houseType = document.querySelector("#type").value;
@@ -262,9 +260,76 @@ function setPriceValidity() {
   }
 }
 
-document.querySelector("#type").addEventListener("change", setPriceValidity);
 
-document.querySelector(".ad-form__element--time").onchange = function (e) {
-  document.querySelector("#timein").value = e.target.value;
-  document.querySelector("#timeout").value = e.target.value;
+var removeActivePin = function () {
+  var activePin = map.querySelector(".map__pin--active");
+  if (activePin) {
+    activePin.classList.remove("map__pin--active");
+  }
 };
+
+function cardShow(event) {
+  var pins = document.querySelectorAll(".map__pin:not(.map__pin--main)");
+  var cards = document.querySelectorAll(".map__card");
+  pins.forEach(function (elem, i) {
+    if (event.target.parentElement === elem || elem === document.activeElement) {
+      removeActivePin();
+      hideOffer();
+      elem.classList.add("map__pin--active");
+      cards[i].classList.remove("hidden");
+      map.addEventListener("click", closeOffer);
+      document.addEventListener("keydown", closeOffer);
+    }
+  }
+  )
+}
+
+function hideOffer() {
+  var offerCards = map.querySelectorAll('.popup');
+  offerCards.forEach(function (elem) {
+    if (elem.classList.contains('.hidden') !== true) {
+      elem.classList.add('hidden');
+    }
+  });
+};
+
+function closeOffer(event) {
+  if (event.type === "keydown" && event.keyCode === 27 || event.type === "click" && event.target.classList.contains("popup__close")) {
+    removeActivePin();
+    hideOffer();
+    map.removeEventListener("click", closeOffer);
+    document.removeEventListener("keydown", closeOffer);
+  }
+};
+
+function callPriceValidation() {
+  document.querySelector("#type").addEventListener("change", setPriceValidity);
+}
+
+function callMainPinReaction() {
+  mainPin.addEventListener("mousedown", logMouseButton);
+  mainPin.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      activatePage();
+    }
+  });
+}
+
+function callGuestsValidation() {
+  document.querySelector("#room_number").addEventListener("change", setGuestsLimit);
+}
+
+function callShowPinsCall() {
+  document.querySelector('.map__pins').addEventListener('click', cardShow);
+}
+
+function callTimeValidation() {
+  document.querySelector(".ad-form__element--time").onchange = function (event) {
+    document.querySelector("#timein").value = event.target.value;
+    document.querySelector("#timeout").value = event.target.value;
+  };
+}
+
+deactivatePage();
+callMainPinReaction();
