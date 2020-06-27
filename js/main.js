@@ -10,28 +10,30 @@ var images = [
   "http://o0.github.io/assets/images/tokyo/hotel3.jpg",
 ];
 var features = ["wifi", "dishwasher", "parking", "washer", "elevator", "conditioner"];
+
 var map = document.documentElement.querySelector(".map");
-var form = document.documentElement.querySelector(".ad-form");
 var mapPins = document.querySelector(".map__pins");
 var cardTemplate = document.querySelector("#card").content;
 var before = document.querySelector(".map__filters-container");
 var parentDiv = before.parentNode;
-var allFieldset = document.querySelectorAll("fieldset");
 var mainPin = document.querySelector(".map__pin--main");
-var address = document.querySelector("#address");
-var price = document.querySelector("#price");
-var roomNumber = document.querySelector("#room_number");
-var capacity = document.querySelector("#capacity");
-var coordX = mainPin.offsetLeft
-var coordY = mainPin.offsetTop
 
+
+var bookingForm = document.documentElement.querySelector(".ad-form");
+var bookingFormFieldsets = bookingForm.querySelectorAll("fieldset");
+var addressInput = bookingForm.querySelector("#address");
+var priceInput = bookingForm.querySelector("#price");
+var capacitySelect = bookingForm.querySelector("#capacity");
+var typeSelect = document.querySelector("#type");
+var roomNumberSelect = document.querySelector("#room_number")
 
 var PIN_IMG_WIDTH = 40;
 var PIN_IMG_HEIGHT = 40;
+
 var PHOTO_IMG_WIDTH = 45;
 var PHOTO_IMG_HEIGHT = 40;
-var PIN_IMG_SIZE = 65;
-var PIN_IMG_ACTIVE_HEIGHT = 87;
+
+var MAIN_PIN_ARROW_HEIGHT = 87;
 
 var getRandomNumber = function (min, max) {
   return min + Math.floor(Math.random() * (max - min));
@@ -73,19 +75,19 @@ var generateHotels = function (amount) {
   return hotels;
 };
 
-var hotels = generateHotels(7);
-
-function createPins(array) {
+function createPins(hotels) {
   var fragment = document.createDocumentFragment();
-  for (var i = 0; i < array.length; i++) {
+
+  for (var i = 0; i < hotels.length; i++) {
     var pin = document.createElement("button");
-    pin.style = "left: " + array[i].location.x + "px;" + " " + "top: " + array[i].location.y + "px;";
-    pin.className = "map__pin";
+    pin.style = "left: " + hotels[i].location.x + "px;" + " " + "top: " + hotels[i].location.y + "px;";
     pin.innerHTML = "<img/>";
     pin.querySelector("img").width = PIN_IMG_WIDTH;
     pin.querySelector("img").height = PIN_IMG_HEIGHT;
-    pin.querySelector("img").src = array[i].author.avatar;
-    pin.querySelector("img").alt = array[i].offer.type;
+    pin.querySelector("img").src = hotels[i].author.avatar;
+    pin.querySelector("img").alt = hotels[i].offer.type;
+    pin.querySelector("img").dataset.pinId = i;
+    pin.classList.add("map__pin");
 
     fragment.appendChild(pin);
   }
@@ -152,184 +154,191 @@ function createCards(array) {
   return fragment;
 }
 
-var setRoundPinLocation = function () {
-  address.value = "x: " + (coordX - Math.round(PIN_IMG_SIZE / 2)) + ", y: " + (coordY - Math.round(PIN_IMG_SIZE / 2));
-}; // расчет координат конца пина до актиации страницы (круглый пин)
-
-
-var setPinLocation = function () {
-  address.value = "x: " + (coordX - Math.round(PIN_IMG_SIZE / 2)) + ", y: " + (coordY - PIN_IMG_ACTIVE_HEIGHT);
-}; // расчет координат конца пина после актиации страницы и появления хвостика
-
-function deactivatePage() {
-  for (let oneFieldset of allFieldset) {
-    oneFieldset.setAttribute("disabled", "disabled");
+function getMainPinCenterCoordinates() {
+  return {
+    x: mainPin.offsetLeft + Math.round(mainPin.offsetWidth / 2),
+    y: mainPin.offsetTop + Math.round(mainPin.offsetHeight / 2),
   }
-  address.setAttribute("value", "");
-  setRoundPinLocation();
-
 }
 
-function logMouseButton(event) {
-  if (event.which == 1) {
+function getMainPinArrowCoordinates() {
+  return {
+    x: mainPin.offsetLeft + Math.round(mainPin.offsetWidth / 2),
+    y: mainPin.offsetTop + MAIN_PIN_ARROW_HEIGHT,
+  }
+}
+
+function mainPinClick(event) {
+  if (event.which === 1) {
     activatePage();
   }
 }
 
+function mainPinEnterPress(event) {
+  if (event.key === "Enter") {
+    activatePage();
+  }
+}
 
+function deactivatePage() {
+  map.classList.add("map--faded");
+  bookingForm.classList.add("ad-form--disabled");
+
+  for (var fieldset of bookingFormFieldsets) {
+    fieldset.setAttribute("disabled", "disabled");
+  }
+
+  var coords = getMainPinCenterCoordinates();
+  addressInput.value = "x: " + coords.x + ", y: " + coords.y;
+
+  mainPin.addEventListener("mousedown", mainPinClick);
+  mainPin.addEventListener("keydown", mainPinEnterPress);
+}
 
 function activatePage() {
   map.classList.remove("map--faded");
-  form.classList.remove("ad-form--disabled");
+  bookingForm.classList.remove("ad-form--disabled");
 
-  for (let oneFieldset of allFieldset) {
-    oneFieldset.removeAttribute("disabled", "disabled");
+  for (var fieldset of bookingFormFieldsets) {
+    fieldset.removeAttribute("disabled");
   }
-  setPinLocation();
-  setPriceValidity();
-  setGuestsLimit()
 
+  var coords = getMainPinArrowCoordinates();
+  addressInput.value = "x: " + coords.x + ", y: " + coords.y;
+
+  setPriceRestrictions();
+  validateGuestsLimit();
+
+  var hotels = generateHotels(7);
   mapPins.appendChild(createPins(hotels));
   parentDiv.insertBefore(createCards(hotels), before);
-  hideOffer();
+  hideCards();
 
-  callPriceValidation();
-  callGuestsValidation();
-  callShowPins();
-  callTimeValidation();
+  typeSelect.addEventListener("change", setPriceRestrictions);
+  roomNumberSelect.addEventListener("change", validateGuestsLimit);
+
+  mapPins.addEventListener('click', showCard);
+
+  mainPin.removeEventListener("mousedown", mainPinClick);
+  mainPin.removeEventListener("keydown", mainPinEnterPress);
+
+  syncCheckinTimes();
 }
 
+function validateGuestsLimit() {
+  var selectedRoom = roomNumberSelect.value;
+  var capacityOptions = capacitySelect.querySelectorAll("option");
 
-function setGuestsLimit() {
-  var roomValue = document.querySelector("#room_number").value;
-  var optionsCapacity = capacity.querySelectorAll("option");
-  if (roomValue === "1") {
-    for (let optionCapacity of optionsCapacity)
-      if (optionCapacity.value > 1 || optionCapacity.value === "0") {
-        optionCapacity.disabled = true;
-      }
-      else {
-        optionCapacity.disabled = false;
-      }
-    capacity.children[2].selected = true;
-  }
-  if (roomValue === "2") {
-    for (let optionCapacity of optionsCapacity)
-      if (optionCapacity.value > 2 || optionCapacity.value === "0") {
-        optionCapacity.disabled = true;
-      }
-      else {
-        optionCapacity.disabled = false;
-      }
-    capacity.children[1].selected = true;
-  }
-  if (roomValue === "3") {
-    for (let optionCapacity of optionsCapacity)
-      if (optionCapacity.value === "0") {
-        optionCapacity.disabled = true;
-      } else {
-        optionCapacity.disabled = false;
-      }
-    capacity.children[0].selected = true;
-  }
-
-  if (roomValue === "100") {
-    for (var i = 0; i < capacity.children.length; i++) {
-      capacity.children[i].disabled = true;
+  if (selectedRoom === "1") {
+    for (var option of capacityOptions) {
+      option.disabled = option.value > 1 || option.value === "0";
     }
-    capacity.children[3].selected = true;
-    capacity.children[3].disabled = false;
+    capacitySelect.children[2].selected = true;
   }
-};
 
+  if (selectedRoom === "2") {
+    for (option of capacityOptions) {
+      option.disabled = option.value > 2 || option.value === "0";
+    }
+    capacitySelect.children[1].selected = true;
+  }
 
-function setPriceValidity() {
-  var houseType = document.querySelector("#type").value;
-  if (houseType === "bungalo") {
-    price.placeholder = "0";
-    price.setAttribute("min", "0");
-  } else if (houseType == "flat") {
-    price.placeholder = "1000";
-    price.setAttribute("min", "1000");
-  } else if (houseType === "house") {
-    price.placeholder = "5000";
-    price.setAttribute("min", "5000");
-  } else if (houseType === "palace") {
-    price.placeholder = "10 000";
-    price.setAttribute("min", "10000");
+  if (selectedRoom === "3") {
+    for (option of capacityOptions) {
+      option.disabled = option.value === "0";
+    }
+    capacitySelect.children[0].selected = true;
+  }
+
+  if (selectedRoom === "100") {
+    for (option of capacityOptions) {
+      option.disabled = option.value !== "0";
+    }
+     capacitySelect.children[3].selected = true;
   }
 }
 
+function setPriceRestrictions() {
+  switch (typeSelect.value) {
+    case 'flat': {
+      priceInput.placeholder = "1000";
+      priceInput.setAttribute("min", "1000");
+      break;
+    }
+    case 'house': {
+      priceInput.placeholder = "5000";
+      priceInput.setAttribute("min", "5000");
+      break;
+    }
+    case 'palace': {
+      priceInput.placeholder = "10 000";
+      priceInput.setAttribute("min", "10000");
+      break;
+    }
+    default: {
+      priceInput.placeholder = "0";
+      priceInput.setAttribute("min", "0");
+    }
+  }
+}
 
-var removeActivePin = function () {
+function removeActivePin() {
   var activePin = map.querySelector(".map__pin--active");
   if (activePin) {
     activePin.classList.remove("map__pin--active");
   }
-};
-
-function cardShow(event) {
-  var pins = document.querySelectorAll(".map__pin:not(.map__pin--main)");
-  var cards = document.querySelectorAll(".map__card");
-  pins.forEach(function (elem, i) {
-    if (event.target.parentElement === elem || elem === document.activeElement) {
-      removeActivePin();
-      hideOffer();
-      elem.classList.add("map__pin--active");
-      cards[i].classList.remove("hidden");
-      map.addEventListener("click", closeOffer);
-      document.addEventListener("keydown", closeOffer);
-    }
-  }
-  )
 }
 
-function hideOffer() {
-  var offerCards = map.querySelectorAll('.popup');
-  offerCards.forEach(function (elem) {
+
+function showCard(event) {
+  var cards = document.querySelectorAll(".map__card");
+  hideActiveCard();
+
+  if(event.target.dataset.pinId !== undefined) {
+    removeActivePin();
+    event.target.classList.add("map__pin--active");
+    cards[event.target.dataset.pinId].classList.remove("hidden");
+    cards[event.target.dataset.pinId].classList.add("map__card--active");
+
+    map.addEventListener("click", closeOffer);
+    document.addEventListener("keydown", closeOffer);
+  }
+}
+
+function hideCards() {
+  var cards = map.querySelectorAll('.popup');
+  cards.forEach(function (elem) {
     if (elem.classList.contains('.hidden') !== true) {
       elem.classList.add('hidden');
     }
   });
-};
+}
+
+function hideActiveCard() {
+  var card = document.querySelector(".map__card--active");
+  if (card) {
+    card.classList.add("hidden");
+    card.classList.remove("map__card--active");
+  }
+}
 
 function closeOffer(event) {
-  if (event.type === "keydown" && event.keyCode === 27 || event.type === "click" && event.target.classList.contains("popup__close")) {
+  if (
+    event.type === "keydown" && event.keyCode === 27 ||
+    event.type === "click" && event.target.classList.contains("popup__close")
+  ) {
     removeActivePin();
-    hideOffer();
+    hideActiveCard();
     map.removeEventListener("click", closeOffer);
     document.removeEventListener("keydown", closeOffer);
   }
-};
-
-function callPriceValidation() {
-  document.querySelector("#type").addEventListener("change", setPriceValidity);
 }
 
-function callMainPinReaction() {
-  mainPin.addEventListener("mousedown", logMouseButton);
-  mainPin.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      activatePage();
-    }
+function syncCheckinTimes() {
+  document.querySelector(".ad-form__element--time").addEventListener('change', function (event) {
+    document.querySelector("#timein").value = event.target.value;
+    document.querySelector("#timeout").value = event.target.value;
   });
 }
 
-function callGuestsValidation() {
-  document.querySelector("#room_number").addEventListener("change", setGuestsLimit);
-}
-
-function callShowPinsCall() {
-  document.querySelector('.map__pins').addEventListener('click', cardShow);
-}
-
-function callTimeValidation() {
-  document.querySelector(".ad-form__element--time").onchange = function (event) {
-    document.querySelector("#timein").value = event.target.value;
-    document.querySelector("#timeout").value = event.target.value;
-  };
-}
-
 deactivatePage();
-callMainPinReaction();
