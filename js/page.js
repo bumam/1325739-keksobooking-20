@@ -20,7 +20,6 @@
 
     mainPinClick();
     window.utils.mainPin.addEventListener('keydown', mainPinEnterPress);
-
   }
 
   function activatePage() {
@@ -65,9 +64,15 @@
 
         var onMouseMove = function (moveEvt) {
           moveEvt.preventDefault();
+
           var shift = {
             x: startCoords.x - moveEvt.clientX,
             y: startCoords.y - moveEvt.clientY
+          };
+
+          var mainPinPosition = {
+            x: window.utils.mainPin.offsetLeft - shift.x,
+            y: window.utils.mainPin.offsetTop - shift.y
           };
 
           startCoords = {
@@ -75,8 +80,30 @@
             y: moveEvt.clientY
           };
 
-          window.utils.mainPin.style.top = (window.utils.mainPin.offsetTop - shift.y) + 'px';
-          window.utils.mainPin.style.left = (window.utils.mainPin.offsetLeft - shift.x) + 'px';
+          var DragLimit = {
+            X: {
+              MIN: 0,
+              MAX: window.utils.mainPin.parentNode.offsetWidth
+            },
+            Y: {
+              MIN: 230,
+              MAX: 630
+            }
+          };
+          console.log(DragLimit.X.MAX)
+
+          var Border = {
+            TOP: DragLimit.Y.MIN - window.utils.MAIN_PIN_ARROW_HEIGHT,
+            BOTTOM: DragLimit.Y.MAX - window.utils.MAIN_PIN_ARROW_HEIGHT,
+            LEFT: DragLimit.X.MIN,
+            RIGHT: DragLimit.X.MAX - window.utils.mainPin.offsetWidth
+          };
+          if (mainPinPosition.x >= Border.LEFT && mainPinPosition.x <= Border.RIGHT) {
+            window.utils.mainPin.style.left = mainPinPosition.x + 'px';
+          }
+          if (mainPinPosition.y >= Border.TOP && mainPinPosition.y <= Border.BOTTOM) {
+            window.utils.mainPin.style.top = mainPinPosition.y + 'px';
+          }
 
         };
         var onMouseUp = function (upEvt) {
