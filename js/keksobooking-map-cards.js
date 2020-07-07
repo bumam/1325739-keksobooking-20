@@ -1,6 +1,24 @@
 'use strict';
 
 (function () {
+  var PHOTO_IMG_WIDTH = 45;
+  var PHOTO_IMG_HEIGHT = 40;
+
+  function createPhotos(array) {
+    var fragment = document.createDocumentFragment();
+
+    for (var i = 0; i < array.length; i++) {
+      var newImg = document.createElement('img');
+      newImg.width = PHOTO_IMG_WIDTH;
+      newImg.height = PHOTO_IMG_HEIGHT;
+      newImg.src = array[i];
+      newImg.alt = 'Фотография жилья';
+
+      fragment.appendChild(newImg);
+    }
+    return fragment;
+  }
+
   function createCards(array) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < array.length; i++) {
@@ -26,7 +44,7 @@
       var cardPhotos = card.querySelector('.popup__photos');
       cardPhotos.innerHTML = '';
 
-      cardPhotos.appendChild(window.data.createPhotos(offer.photos));
+      cardPhotos.appendChild(createPhotos(offer.photos));
       card.querySelectorAll('li:empty').forEach(function (element) {
         element.remove();
       });
@@ -84,7 +102,5 @@
     createCards: createCards,
     hideCards: hideCards,
     showCard: showCard,
-    hideActiveCard: hideActiveCard,
-    closeOffer: closeOffer,
   };
 })();

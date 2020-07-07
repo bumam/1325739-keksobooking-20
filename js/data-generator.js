@@ -46,26 +46,7 @@
     return hotels;
   }
 
-
-  function createPhotos(array) {
-    var fragment = document.createDocumentFragment();
-
-    for (var j = 0; j < array.length; j++) {
-      var newImg = document.createElement('img');
-      newImg.width = window.utils.PHOTO_IMG_WIDTH;
-      newImg.height = window.utils.PHOTO_IMG_HEIGHT;
-      newImg.src = array[j];
-      newImg.alt = 'Фотография жилья';
-
-      fragment.appendChild(newImg);
-    }
-    return fragment;
-  }
-
   window.data = {
-    getCuttedArray: getCuttedArray,
-    generateHotels: generateHotels,
-    createPhotos: createPhotos,
+    generateHotels: generateHotels
   };
-
 })();

@@ -1,8 +1,6 @@
 'use strict';
 
-// Утилитный модуль
 (function () {
-
   var priceInput = window.utils.bookingForm.querySelector('#price');
   var capacitySelect = window.utils.bookingForm.querySelector('#capacity');
 
@@ -74,9 +72,29 @@
       }
     }
   }
+  function activateForm() {
+    setPriceRestrictions();
+    validateGuestsLimit();
+    window.utils.typeSelect.addEventListener('change', setPriceRestrictions);
+    window.utils.roomNumberSelect.addEventListener('change', validateGuestsLimit);
+
+    document.querySelector('.ad-form__element--time').addEventListener('change', syncCheckinTimes);
+  }
+
+  function syncCheckinTimes(event) {
+    document.querySelector('#timein').value = event.target.value;
+    document.querySelector('#timeout').value = event.target.value;
+  }
+
+  function deactivateForm() {
+    document.querySelector('.ad-form__element--time').removeEventListener('change', syncCheckinTimes);
+  }
+
   window.form = {
+    activateForm: activateForm,
     getTypeLabel: getTypeLabel,
     validateGuestsLimit: validateGuestsLimit,
-    setPriceRestrictions: setPriceRestrictions
+    setPriceRestrictions: setPriceRestrictions,
+    syncCheckinTimes: syncCheckinTimes,
   };
 })();
