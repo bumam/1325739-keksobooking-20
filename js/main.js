@@ -1,14 +1,19 @@
 'use strict';
 
 (function () {
-  var mapSection = window.utils.mapSection;
-  var mainPin = window.utils.mainPin;
+  var mapSection = mapSection;
+  var mainPin = mainPin;
+  var map = document.documentElement.querySelector('.map');
+  var before = document.querySelector('.map__filters-container');
+  var mainPin = document.querySelector('.map__pin--main');
+  var bookingForm = document.documentElement.querySelector('.ad-form');
+  var mapSection = document.querySelector('.map__pins');
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
 
-  var bookingFormFieldsets = window.utils.bookingForm.querySelectorAll('fieldset');
-  var addressInput = window.utils.bookingForm.querySelector('#address');
-  var parentDiv = window.utils.before.parentNode;
+  var bookingFormFieldsets = bookingForm.querySelectorAll('fieldset');
+  var addressInput = bookingForm.querySelector('#address');
+  var parentDiv = before.parentNode;
 
   var startCoords = {
     x: null,
@@ -63,7 +68,7 @@
   function onMouseUp(event) {
     event.preventDefault();
 
-    if (window.utils.map.className === "map map--faded") {
+    if (map.className === "map map--faded") {
       activatePage();
     }
 
@@ -74,10 +79,10 @@
 
   function deactivatePage() {
     // скрывает карту
-    window.utils.map.classList.add('map--faded');
+    map.classList.add('map--faded');
     // блокирует форму
-    window.utils.bookingForm.classList.add('ad-form--disabled');
-    for(var fieldset of bookingFormFieldsets) {
+    bookingForm.classList.add('ad-form--disabled');
+    for (var fieldset of bookingFormFieldsets) {
       fieldset.setAttribute('disabled', 'disabled');
     }
 
@@ -103,9 +108,9 @@
 
   function activatePage() {
     // отобразила карту
-    window.utils.map.classList.remove('map--faded');
+    map.classList.remove('map--faded');
     // отобразила форму
-    window.utils.bookingForm.classList.remove('ad-form--disabled');
+    bookingForm.classList.remove('ad-form--disabled');
     for (var fieldset of bookingFormFieldsets) {
       fieldset.removeAttribute('disabled');
     }
@@ -113,20 +118,15 @@
     var coords = window.pin.getMainPinArrowCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
-    // window.form.setPriceRestrictions();
-    // window.form.validateGuestsLimit();
-
     var hotels = window.data.generateHotels(7);
 
     mapSection.appendChild(window.pin.createPins(hotels));
-    parentDiv.insertBefore(window.card.createCards(hotels), window.utils.before);
+    parentDiv.insertBefore(window.card.createCards(hotels), before);
     window.card.hideCards();
 
     window.form.activateForm();
 
     mapSection.addEventListener('click', window.card.showCard);
-
-    // window.utils.mainPin.removeEventListener('mousedown', mainPinClick);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
   }
 
@@ -138,5 +138,3 @@
 
   deactivatePage();
 })();
-
-

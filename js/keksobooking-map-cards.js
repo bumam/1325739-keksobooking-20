@@ -3,6 +3,8 @@
 (function () {
   var PHOTO_IMG_WIDTH = 45;
   var PHOTO_IMG_HEIGHT = 40;
+  var map = document.documentElement.querySelector('.map');
+  var cardTemplate = document.querySelector('#card').content;
 
   function createPhotos(array) {
     var fragment = document.createDocumentFragment();
@@ -22,7 +24,7 @@
   function createCards(array) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < array.length; i++) {
-      var card = window.utils.cardTemplate.cloneNode(true);
+      var card = cardTemplate.cloneNode(true);
       var offer = array[i].offer;
       card.querySelector('.popup__avatar').src = array[i].author.avatar;
       card.querySelector('.popup__title').textContent = offer.title;
@@ -64,13 +66,13 @@
       cards[event.target.dataset.pinId].classList.remove('hidden');
       cards[event.target.dataset.pinId].classList.add('map__card--active');
 
-      window.utils.map.addEventListener('click', closeOffer);
+      map.addEventListener('click', closeOffer);
       document.addEventListener('keydown', closeOffer);
     }
   }
 
   function hideCards() {
-    var cards = window.utils.map.querySelectorAll('.popup');
+    var cards = map.querySelectorAll('.popup');
     cards.forEach(function (elem) {
       if (elem.classList.contains('.hidden') !== true) {
         elem.classList.add('hidden');
@@ -93,7 +95,7 @@
     ) {
       window.pin.removeActivePin();
       hideActiveCard();
-      window.utils.map.removeEventListener('click', closeOffer);
+      map.removeEventListener('click', closeOffer);
       document.removeEventListener('keydown', closeOffer);
     }
   }

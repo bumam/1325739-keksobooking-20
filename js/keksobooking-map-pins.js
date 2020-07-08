@@ -4,6 +4,8 @@
   var PIN_IMG_WIDTH = 40;
   var PIN_IMG_HEIGHT = 40;
   var MAIN_PIN_ARROW_HEIGHT = 87;
+  var map = document.documentElement.querySelector('.map');
+  var mainPin = document.querySelector('.map__pin--main');
 
   function createPins(hotels) {
     var fragment = document.createDocumentFragment();
@@ -25,7 +27,7 @@
   }
 
   function removeActivePin() {
-    var activePin = window.utils.map.querySelector('.map__pin--active');
+    var activePin = map.querySelector('.map__pin--active');
     if (activePin) {
       activePin.classList.remove('map__pin--active');
     }
@@ -33,15 +35,15 @@
 
   function getMainPinCenterCoordinates() {
     return {
-      x: window.utils.mainPin.offsetLeft + Math.round(window.utils.mainPin.offsetWidth / 2),
-      y: window.utils.mainPin.offsetTop + Math.round(window.utils.mainPin.offsetHeight / 2),
+      x: mainPin.offsetLeft + Math.round(mainPin.offsetWidth / 2),
+      y: mainPin.offsetTop + Math.round(mainPin.offsetHeight / 2),
     };
   }
 
   function getMainPinArrowCoordinates() {
     return {
-      x: window.utils.mainPin.offsetLeft + Math.round(window.utils.mainPin.offsetWidth / 2),
-      y: window.utils.mainPin.offsetTop + MAIN_PIN_ARROW_HEIGHT,
+      x: mainPin.offsetLeft + Math.round(mainPin.offsetWidth / 2),
+      y: mainPin.offsetTop + MAIN_PIN_ARROW_HEIGHT,
     };
   }
 

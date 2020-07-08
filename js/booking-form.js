@@ -1,8 +1,12 @@
 'use strict';
 
 (function () {
-  var priceInput = window.utils.bookingForm.querySelector('#price');
-  var capacitySelect = window.utils.bookingForm.querySelector('#capacity');
+  var bookingForm = document.documentElement.querySelector('.ad-form');
+  var priceInput = bookingForm.querySelector('#price');
+  var capacitySelect = bookingForm.querySelector('#capacity');
+  var typeSelect = document.querySelector('#type');
+  var roomNumberSelect = document.querySelector('#room_number');
+
 
   function getTypeLabel(type) {
     if (type === 'flat') {
@@ -17,7 +21,7 @@
   }
 
   function validateGuestsLimit() {
-    var selectedRoom = window.utils.roomNumberSelect.value;
+    var selectedRoom = roomNumberSelect.value;
     var capacityOptions = capacitySelect.querySelectorAll('option');
 
     if (selectedRoom === '1') {
@@ -50,7 +54,7 @@
   }
 
   function setPriceRestrictions() {
-    switch (window.utils.typeSelect.value) {
+    switch (typeSelect.value) {
       case 'flat': {
         priceInput.placeholder = '1000';
         priceInput.setAttribute('min', '1000');
@@ -72,12 +76,12 @@
       }
     }
   }
+
   function activateForm() {
     setPriceRestrictions();
     validateGuestsLimit();
-    window.utils.typeSelect.addEventListener('change', setPriceRestrictions);
-    window.utils.roomNumberSelect.addEventListener('change', validateGuestsLimit);
-
+    typeSelect.addEventListener('change', setPriceRestrictions);
+    roomNumberSelect.addEventListener('change', validateGuestsLimit);
     document.querySelector('.ad-form__element--time').addEventListener('change', syncCheckinTimes);
   }
 
