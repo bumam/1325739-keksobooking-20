@@ -6,6 +6,11 @@
   var capacitySelect = bookingForm.querySelector('#capacity');
   var typeSelect = document.querySelector('#type');
   var roomNumberSelect = document.querySelector('#room_number');
+  var header = document.querySelector('#title');
+  var mainPin = document.querySelector('.map__pin--main');
+  var map = document.querySelector('.map');
+
+  var MAIN_PIN_BTN_WIDTH = 65;
 
 
   function getTypeLabel(type) {
@@ -92,9 +97,17 @@
 
   function deactivateForm() {
     document.querySelector('.ad-form__element--time').removeEventListener('change', syncCheckinTimes);
+    header.value = "";
+    type.value = "flat";
+    priceInput.value = "";
+    priceInput.placeholder = "5000";
+    mainPin.style.left = map.offsetWidth / 2 + 16 + "px";
+    mainPin.style.top = map.offsetHeight / 2 + "px";
   }
 
+
   window.form = {
+    deactivateForm: deactivateForm,
     activateForm: activateForm,
     getTypeLabel: getTypeLabel,
     validateGuestsLimit: validateGuestsLimit,

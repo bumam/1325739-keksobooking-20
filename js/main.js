@@ -1,13 +1,13 @@
 'use strict';
 
 (function () {
-  var mapSection = mapSection;
-  var mainPin = mainPin;
-  var map = document.documentElement.querySelector('.map');
+  var map = document.querySelector('.map');
   var before = document.querySelector('.map__filters-container');
   var mainPin = document.querySelector('.map__pin--main');
   var bookingForm = document.documentElement.querySelector('.ad-form');
   var mapSection = document.querySelector('.map__pins');
+  var tegMain = document.querySelector("main");
+
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
 
@@ -86,6 +86,13 @@
       fieldset.setAttribute('disabled', 'disabled');
     }
 
+    var mapPins = document.querySelectorAll(".map__pin:not(.map__pin--main)");
+    for (var mapPin of mapPins) {
+      mapPin.classList.add('hidden');
+    }
+
+    window.form.deactivateForm();
+
     var coords = window.pin.getMainPinCenterCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
@@ -104,7 +111,10 @@
       }
     });
     mainPin.addEventListener('keydown', mainPinKeydownHandler);
+
+
   }
+
 
   function activatePage() {
     // отобразила карту
@@ -115,19 +125,28 @@
       fieldset.removeAttribute('disabled');
     }
 
+    var mapPins = document.querySelectorAll(".map__pin:not(.map__pin--main)");
+    for (var mapPin of mapPins) {
+      mapPin.classList.remove('hidden');
+    }
+
     var coords = window.pin.getMainPinArrowCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
-    var hotels = window.data.generateHotels(7);
+    if (mapSection.children.length < 3) {
+      window.load(function (hotels) {
+        mapSection.appendChild(window.pin.createPins(hotels));
+        parentDiv.insertBefore(window.card.createCards(hotels), before);
+        window.card.hideCards();
+      }, function () {});
+    }
 
-    mapSection.appendChild(window.pin.createPins(hotels));
-    parentDiv.insertBefore(window.card.createCards(hotels), before);
-    window.card.hideCards();
 
     window.form.activateForm();
-
     mapSection.addEventListener('click', window.card.showCard);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
+
+    onSubmit();
   }
 
   function mainPinKeydownHandler(event) {
@@ -135,6 +154,65 @@
       activatePage();
     }
   }
+
+  function successNoticenKeydownHandler(event) {
+    if (event.key === 'Escape') {
+      document.querySelector(".success").classList.add('hidden')
+    }
+  }
+
+  function showSuccessNotice() {
+    if (document.querySelector(".success") === null) {
+      var fragment = document.createDocumentFragment();
+      var sucNotice = document.querySelector("#success").content.cloneNode(true);
+      fragment.appendChild(sucNotice);
+      return fragment;
+    }
+  }
+
+  function hideSuccessNotice() {
+    document.querySelector(".success").classList.remove('hidden');
+    document.querySelector(".success").addEventListener('click', function () {
+      document.querySelector(".success").classList.add('hidden')
+    })
+  }
+
+  function showErrorNotice() {
+    if (document.querySelector(".error") === null) {
+      var fragment = document.createDocumentFragment();
+      var erNotice = document.querySelector("#error").content.cloneNode(true);
+      fragment.appendChild(erNotice);
+      return fragment;
+    }
+  }
+
+  function hideErrorNotice() {
+    document.querySelector(".error").classList.remove('hidden');
+    document.querySelector(".error").addEventListener('click', function () {
+      document.querySelector(".error").classList.add('hidden')
+    })
+  }
+
+  function onSubmit() {
+    bookingForm.addEventListener('submit', function (evt) {
+      window.upload(new FormData(bookingForm), function (data) {
+        onSuccess(data)
+        if (!tegMain.querySelector(".success")) {
+          tegMain.appendChild(showSuccessNotice());
+          document.querySelector("body").addEventListener('keydown', successNoticenKeydownHandler);
+        }
+        hideSuccessNotice();
+        deactivatePage();
+      });
+      evt.preventDefault();
+    })
+  }
+
+  function onSuccess(data) {
+    console.log(data);
+  };
+
+
 
   deactivatePage();
 })();

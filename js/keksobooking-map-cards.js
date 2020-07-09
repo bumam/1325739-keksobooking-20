@@ -51,6 +51,10 @@
         element.remove();
       });
 
+      card.querySelectorAll('li:empty').forEach(function (element) {
+        element.remove();
+      });
+
       fragment.appendChild(card);
     }
     return fragment;
