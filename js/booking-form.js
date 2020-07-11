@@ -5,12 +5,12 @@
   var priceInput = bookingForm.querySelector('#price');
   var capacitySelect = bookingForm.querySelector('#capacity');
   var typeSelect = document.querySelector('#type');
+  var timeIn = document.querySelector('#timein');
+  var timeOut = document.querySelector('#timeout');
   var roomNumberSelect = document.querySelector('#room_number');
   var header = document.querySelector('#title');
   var mainPin = document.querySelector('.map__pin--main');
   var map = document.querySelector('.map');
-
-  var MAIN_PIN_BTN_WIDTH = 65;
 
 
   function getTypeLabel(type) {
@@ -95,19 +95,22 @@
     document.querySelector('#timeout').value = event.target.value;
   }
 
-  function deactivateForm() {
-    document.querySelector('.ad-form__element--time').removeEventListener('change', syncCheckinTimes);
+  function cleanForm() {
     header.value = "";
     type.value = "flat";
     priceInput.value = "";
-    priceInput.placeholder = "5000";
+    priceInput.placeholder = "1000";
     mainPin.style.left = map.offsetWidth / 2 + 16 + "px";
     mainPin.style.top = map.offsetHeight / 2 + "px";
+    timeIn.value = "12:00";
+    timeOut.value = "12:00";
+    roomNumberSelect.children[0].selected = true;
+    capacitySelect.children[2].selected = true;
   }
 
 
   window.form = {
-    deactivateForm: deactivateForm,
+    cleanForm: cleanForm,
     activateForm: activateForm,
     getTypeLabel: getTypeLabel,
     validateGuestsLimit: validateGuestsLimit,

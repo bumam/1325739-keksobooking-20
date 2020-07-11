@@ -7,6 +7,7 @@
   var bookingForm = document.documentElement.querySelector('.ad-form');
   var mapSection = document.querySelector('.map__pins');
   var tegMain = document.querySelector("main");
+  var cleanForm = document.querySelector(".ad-form__reset")
 
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
@@ -91,7 +92,7 @@
       mapPin.classList.add('hidden');
     }
 
-    window.form.deactivateForm();
+    window.form.cleanForm();
 
     var coords = window.pin.getMainPinCenterCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
@@ -108,11 +109,13 @@
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
+        cleanForm.addEventListener('click', function (event) {
+          event.preventDefault();
+          window.form.cleanForm();
+        });
       }
     });
     mainPin.addEventListener('keydown', mainPinKeydownHandler);
-
-
   }
 
 
@@ -157,7 +160,17 @@
 
   function successNoticenKeydownHandler(event) {
     if (event.key === 'Escape') {
-      document.querySelector(".success").classList.add('hidden')
+      if (document.querySelector(".success")) {
+        document.querySelector(".success").classList.add('hidden')
+      }
+    }
+  }
+
+  function errorNoticenKeydownHandler(event) {
+    if (event.key === 'Escape') {
+      if (document.querySelector(".error")) {
+        document.querySelector(".error").classList.add('hidden')
+      }
     }
   }
 
@@ -187,24 +200,34 @@
   }
 
   function hideErrorNotice() {
-    document.querySelector(".error").classList.remove('hidden');
-    document.querySelector(".error").addEventListener('click', function () {
-      document.querySelector(".error").classList.add('hidden')
+    document.querySelector(".error__button").addEventListener('click', function () {
+      document.querySelector(".error").classList.add('hidden');
+      window.form.cleanForm();
     })
   }
 
   function onSubmit() {
     bookingForm.addEventListener('submit', function (evt) {
       window.upload(new FormData(bookingForm), function (data) {
-        onSuccess(data)
+        onSuccess(data);
         if (!tegMain.querySelector(".success")) {
           tegMain.appendChild(showSuccessNotice());
           document.querySelector("body").addEventListener('keydown', successNoticenKeydownHandler);
         }
         hideSuccessNotice();
         deactivatePage();
+      }, function (data) {
+        onError(data);
+        document.querySelector(".success").classList.add('hidden')
+        if (!tegMain.querySelector(".error")) {
+          tegMain.appendChild(showErrorNotice());
+        }
+        hideErrorNotice();
+        activatePage()
       });
       evt.preventDefault();
+
+      document.querySelector("body").addEventListener('keydown', errorNoticenKeydownHandler);
     })
   }
 
@@ -212,7 +235,9 @@
     console.log(data);
   };
 
-
+  var onError = function (message) {
+    console.error(message);
+  };
 
   deactivatePage();
 })();
