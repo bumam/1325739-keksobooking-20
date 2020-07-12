@@ -11,6 +11,7 @@
 
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
+  var AMOUNT_OF_SHOWED_PINS = 5;
 
   var bookingFormFieldsets = bookingForm.querySelectorAll('fieldset');
   var addressInput = bookingForm.querySelector('#address');
@@ -118,7 +119,6 @@
     mainPin.addEventListener('keydown', mainPinKeydownHandler);
   }
 
-
   function activatePage() {
     // отобразила карту
     map.classList.remove('map--faded');
@@ -138,16 +138,18 @@
 
     if (mapSection.children.length < 3) {
       window.load(function (hotels) {
-        mapSection.appendChild(window.pin.createPins(hotels));
-        parentDiv.insertBefore(window.card.createCards(hotels), before);
-        window.card.hideCards();
-      }, function () {});
+          window.filters.successHandler(hotels);
+          mapSection.appendChild(window.pin.createPins(hotels));
+          parentDiv.insertBefore(window.card.createCards(hotels), before);
+          window.card.hideCards();
+          window.filters.hideExtraPins()
+        },
+        function () {});
     }
-
-
     window.form.activateForm();
     mapSection.addEventListener('click', window.card.showCard);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
+    window.filters.filterHotelTypes()
 
     onSubmit();
   }
@@ -157,6 +159,8 @@
       activatePage();
     }
   }
+
+
 
   function successNoticenKeydownHandler(event) {
     if (event.key === 'Escape') {
@@ -230,6 +234,9 @@
       document.querySelector("body").addEventListener('keydown', errorNoticenKeydownHandler);
     })
   }
+
+
+
 
   function onSuccess(data) {
     console.log(data);

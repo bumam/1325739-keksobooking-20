@@ -29,11 +29,12 @@
     var selectedRoom = roomNumberSelect.value;
     var capacityOptions = capacitySelect.querySelectorAll('option');
 
+
     if (selectedRoom === '1') {
       for (var option of capacityOptions) {
         option.disabled = option.value > 1 || option.value === '0';
       }
-      capacitySelect.children[2].selected = true;
+      capacitySelect.children[1].selected = true;
     }
 
     if (selectedRoom === '2') {
