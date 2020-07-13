@@ -17,7 +17,6 @@
   var PRICE_LOW = 10000;
   var PRICE_MIDDLE = 50000;
 
-
   var mapSection = document.querySelector('.map__pins');
   var before = document.querySelector('.map__filters-container');
   var parentDiv = before.parentNode;
@@ -34,10 +33,10 @@
     }
   }
 
-  var getCurrentFilterValue = function (filter, value) {
+  function getCurrentFilterValue(filter, value) {
     filter = value;
     window.debounce(updateOffers);
-  };
+  }
 
   selectFilters.forEach(function (elem) {
     elem.addEventListener('change', function (evt) {
@@ -51,11 +50,10 @@
     });
   });
 
-  var filterAds = function (ad) {
+  function filterAds(ad) {
     var adOffer = ad.offer;
     var adFeatures = adOffer.features;
     var adPrice = adOffer.price;
-
 
     for (var i = 0; i < selectFilters.length; i++) {
       if (selectFilters[i] === filterType) {
@@ -86,23 +84,23 @@
     }
 
     return true;
-  };
+  }
 
-  var removePins = function () {
+  function removePins() {
     var pins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     pins.forEach(function (elem) {
       elem.remove();
     });
-  };
+  }
 
-  var removeCards = function () {
+  function removeCards() {
     var cards = document.querySelectorAll('.popup');
     cards.forEach(function (elem) {
       elem.remove();
     });
-  };
+  }
 
-  var updateOffers = function () {
+  function updateOffers() {
     window.load(function (hotels) {
       var filteredAds = hotels.filter(filterAds);
       removePins();
@@ -112,7 +110,7 @@
       window.card.hideCards();
       hideExtraPins();
     });
-  };
+  }
 
   window.filter = {
     updateOffers: updateOffers,

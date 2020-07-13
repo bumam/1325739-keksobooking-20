@@ -12,7 +12,6 @@
   var mainPin = document.querySelector('.map__pin--main');
   var map = document.querySelector('.map');
 
-
   function getTypeLabel(type) {
     if (type === 'flat') {
       return 'Квартира';
@@ -108,7 +107,6 @@
     roomNumberSelect.children[0].selected = true;
     capacitySelect.children[2].selected = true;
   }
-
 
   window.form = {
     cleanForm: cleanForm,
