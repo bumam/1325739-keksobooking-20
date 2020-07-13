@@ -30,6 +30,7 @@
       card.querySelector('.popup__title').textContent = offer.title;
       card.querySelector('.popup__text--address').textContent = offer.address;
       card.querySelector('.popup__text--price').textContent = offer.price + '₽/ночь';
+
       card.querySelector('.popup__type').textContent = window.form.getTypeLabel(offer.type);
 
       card.querySelector('.popup__text--capacity').textContent =
@@ -60,15 +61,15 @@
     return fragment;
   }
 
-  function showCard(event) {
+  function showCard(evt) {
     var cards = document.querySelectorAll('.map__card');
     hideActiveCard();
 
-    if (event.target.dataset.pinId !== undefined) {
+    if (evt.target.dataset.pinId !== undefined) {
       window.pin.removeActivePin();
-      event.target.classList.add('map__pin--active');
-      cards[event.target.dataset.pinId].classList.remove('hidden');
-      cards[event.target.dataset.pinId].classList.add('map__card--active');
+      evt.target.classList.add('map__pin--active');
+      cards[evt.target.dataset.pinId].classList.remove('hidden');
+      cards[evt.target.dataset.pinId].classList.add('map__card--active');
 
       map.addEventListener('click', closeOffer);
       document.addEventListener('keydown', closeOffer);
@@ -92,10 +93,10 @@
     }
   }
 
-  function closeOffer(event) {
+  function closeOffer(evt) {
     if (
-      event.type === 'keydown' && event.keyCode === 27 ||
-      event.type === 'click' && event.target.classList.contains('popup__close')
+      evt.type === 'keydown' && evt.keyCode === 27 ||
+      evt.type === 'click' && evt.target.classList.contains('popup__close')
     ) {
       window.pin.removeActivePin();
       hideActiveCard();

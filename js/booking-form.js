@@ -23,38 +23,38 @@
     } else if (type === 'palace') {
       return 'Дворец';
     }
+    return type;
   }
 
   function validateGuestsLimit() {
     var selectedRoom = roomNumberSelect.value;
     var capacityOptions = capacitySelect.querySelectorAll('option');
 
-
     if (selectedRoom === '1') {
-      for (var option of capacityOptions) {
-        option.disabled = option.value > 1 || option.value === '0';
-      }
-      capacitySelect.children[1].selected = true;
+      capacityOptions.forEach(function (elem) {
+        elem.disabled = elem.value > 1 || elem.value === '0';
+      });
+      capacitySelect.children[2].selected = true;
     }
 
     if (selectedRoom === '2') {
-      for (option of capacityOptions) {
-        option.disabled = option.value > 2 || option.value === '0';
-      }
+      capacityOptions.forEach(function (elem) {
+        elem.disabled = elem.value > 2 || elem.value === '0';
+      });
       capacitySelect.children[1].selected = true;
     }
 
     if (selectedRoom === '3') {
-      for (option of capacityOptions) {
-        option.disabled = option.value === '0';
-      }
+      capacityOptions.forEach(function (elem) {
+        elem.disabled = elem.value === '0';
+      });
       capacitySelect.children[0].selected = true;
     }
 
     if (selectedRoom === '100') {
-      for (option of capacityOptions) {
-        option.disabled = option.value !== '0';
-      }
+      capacityOptions.forEach(function (elem) {
+        elem.disabled = elem.value !== '0';
+      });
       capacitySelect.children[3].selected = true;
     }
   }
@@ -91,20 +91,20 @@
     document.querySelector('.ad-form__element--time').addEventListener('change', syncCheckinTimes);
   }
 
-  function syncCheckinTimes(event) {
-    document.querySelector('#timein').value = event.target.value;
-    document.querySelector('#timeout').value = event.target.value;
+  function syncCheckinTimes(evt) {
+    document.querySelector('#timein').value = evt.target.value;
+    document.querySelector('#timeout').value = evt.target.value;
   }
 
   function cleanForm() {
-    header.value = "";
-    type.value = "flat";
-    priceInput.value = "";
-    priceInput.placeholder = "1000";
-    mainPin.style.left = map.offsetWidth / 2 + 16 + "px";
-    mainPin.style.top = map.offsetHeight / 2 + "px";
-    timeIn.value = "12:00";
-    timeOut.value = "12:00";
+    header.value = '';
+    typeSelect.value = 'flat';
+    priceInput.value = '';
+    priceInput.placeholder = '1000';
+    mainPin.style.left = map.offsetWidth / 2 + 16 + 'px';
+    mainPin.style.top = map.offsetHeight / 2 + 'px';
+    timeIn.value = '12:00';
+    timeOut.value = '12:00';
     roomNumberSelect.children[0].selected = true;
     capacitySelect.children[2].selected = true;
   }
