@@ -101,7 +101,7 @@
   }
 
   function updateOffers() {
-    window.load(function (hotels) {
+    window.load('https://javascript.pages.academy/keksobooking/data', function (hotels) {
       var filteredAds = hotels.filter(filterAds);
       removePins();
       removeCards();

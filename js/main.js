@@ -129,7 +129,7 @@
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
     if (mapSection.children.length < 3) {
-      window.load(function (hotels) {
+      window.load('https://javascript.pages.academy/keksobooking/data', function (hotels) {
         mapSection.appendChild(window.pin.createPins(hotels));
         parentDiv.insertBefore(window.card.createCards(hotels), before);
         window.card.hideCards();
@@ -206,7 +206,7 @@
 
   function onSubmit() {
     bookingForm.addEventListener('submit', function (evt) {
-      window.upload(new FormData(bookingForm), function () {
+      window.upload('https://javascript.pages.academy/keksobooking', new FormData(bookingForm), function () {
         if (!tegMain.querySelector('.success')) {
           tegMain.appendChild(showSuccessNotice());
           document.querySelector('body').addEventListener('keydown', successNoticenKeydownHandler);
