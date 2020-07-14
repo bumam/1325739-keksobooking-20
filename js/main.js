@@ -1,13 +1,13 @@
 'use strict';
 
 (function () {
-  var mapSection = mapSection;
-  var mainPin = mainPin;
-  var map = document.documentElement.querySelector('.map');
+  var map = document.querySelector('.map');
   var before = document.querySelector('.map__filters-container');
   var mainPin = document.querySelector('.map__pin--main');
   var bookingForm = document.documentElement.querySelector('.ad-form');
   var mapSection = document.querySelector('.map__pins');
+  var tegMain = document.querySelector('main');
+  var cleanForm = document.querySelector('.ad-form__reset');
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
 
@@ -38,12 +38,12 @@
     RIGHT: dragLimits.X.MAX - mainPin.offsetWidth
   };
 
-  function onMouseMove(event) {
-    event.preventDefault();
+  function onMouseMove(evt) {
+    evt.preventDefault();
 
     var shift = {
-      x: startCoords.x - event.clientX,
-      y: startCoords.y - event.clientY
+      x: startCoords.x - evt.clientX,
+      y: startCoords.y - evt.clientY
     };
 
     var mainPinPosition = {
@@ -52,8 +52,8 @@
     };
 
     startCoords = {
-      x: event.clientX,
-      y: event.clientY
+      x: evt.clientX,
+      y: evt.clientY
     };
 
 
@@ -65,10 +65,10 @@
     }
   }
 
-  function onMouseUp(event) {
-    event.preventDefault();
+  function onMouseUp(evt) {
+    evt.preventDefault();
 
-    if (map.className === "map map--faded") {
+    if (map.className === 'map map--faded') {
       activatePage();
     }
 
@@ -76,34 +76,44 @@
     document.removeEventListener('mouseup', onMouseUp);
   }
 
-
   function deactivatePage() {
     // скрывает карту
     map.classList.add('map--faded');
     // блокирует форму
     bookingForm.classList.add('ad-form--disabled');
-    for (var fieldset of bookingFormFieldsets) {
-      fieldset.setAttribute('disabled', 'disabled');
-    }
+    bookingFormFieldsets.forEach(function (elem) {
+      elem.setAttribute('disabled', 'disabled');
+    });
+
+    window.filter.removeCards();
+    window.filter.removePins();
+
+    window.form.cleanForm();
 
     var coords = window.pin.getMainPinCenterCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
     // при нажатии на главный пин, активируем страницу
-    mainPin.addEventListener('mousedown', function (event) {
-      if (event.which === 1) {
-        event.preventDefault();
+    mainPin.addEventListener('mousedown', function (evt) {
+      if (evt.which === 1) {
+        evt.preventDefault();
 
         startCoords = {
-          x: event.clientX,
-          y: event.clientY
+          x: evt.clientX,
+          y: evt.clientY
         };
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
+
       }
     });
     mainPin.addEventListener('keydown', mainPinKeydownHandler);
+
+    cleanForm.removeEventListener('click', function (evt) {
+      evt.preventDefault();
+      deactivatePage();
+    });
   }
 
   function activatePage() {
@@ -111,29 +121,110 @@
     map.classList.remove('map--faded');
     // отобразила форму
     bookingForm.classList.remove('ad-form--disabled');
-    for (var fieldset of bookingFormFieldsets) {
-      fieldset.removeAttribute('disabled');
-    }
+    bookingFormFieldsets.forEach(function (elem) {
+      elem.removeAttribute('disabled');
+    });
 
     var coords = window.pin.getMainPinArrowCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
 
-    var hotels = window.data.generateHotels(7);
-
-    mapSection.appendChild(window.pin.createPins(hotels));
-    parentDiv.insertBefore(window.card.createCards(hotels), before);
-    window.card.hideCards();
-
+    if (mapSection.children.length < 3) {
+      window.load(function (hotels) {
+        mapSection.appendChild(window.pin.createPins(hotels));
+        parentDiv.insertBefore(window.card.createCards(hotels), before);
+        window.card.hideCards();
+        window.filter.hideExtraPins();
+      });
+    }
     window.form.activateForm();
-
     mapSection.addEventListener('click', window.card.showCard);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
+
+    onSubmit();
+
+    cleanForm.addEventListener('click', function (evt) {
+      evt.preventDefault();
+      deactivatePage();
+    });
   }
 
-  function mainPinKeydownHandler(event) {
-    if (event.key === 'Enter') {
+  function mainPinKeydownHandler(evt) {
+    if (evt.key === 'Enter') {
       activatePage();
     }
+  }
+
+  function successNoticenKeydownHandler(evt) {
+    if (evt.key === 'Escape') {
+      if (document.querySelector('.success')) {
+        document.querySelector('.success').classList.add('hidden');
+      }
+    }
+  }
+
+  function errorNoticenKeydownHandler(evt) {
+    if (evt.key === 'Escape') {
+      if (document.querySelector('.error')) {
+        document.querySelector('.error').classList.add('hidden');
+      }
+    }
+  }
+
+  function showSuccessNotice() {
+    if (document.querySelector('.success') === null) {
+      var fragment = document.createDocumentFragment();
+      var sucNotice = document.querySelector('#success').content.cloneNode(true);
+      fragment.appendChild(sucNotice);
+      return fragment;
+    }
+    return fragment;
+  }
+
+  function hideSuccessNotice() {
+    document.querySelector('.success').classList.remove('hidden');
+    document.querySelector('.success').addEventListener('click', function () {
+      document.querySelector('.success').classList.add('hidden');
+    });
+  }
+
+  function showErrorNotice() {
+    if (document.querySelector('.error') === null) {
+      var fragment = document.createDocumentFragment();
+      var erNotice = document.querySelector('#error').content.cloneNode(true);
+      fragment.appendChild(erNotice);
+      return fragment;
+    }
+    return fragment;
+  }
+
+  function hideErrorNotice() {
+    document.querySelector('.error__button').addEventListener('click', function () {
+      document.querySelector('.error').classList.add('hidden');
+      window.form.cleanForm();
+    });
+  }
+
+  function onSubmit() {
+    bookingForm.addEventListener('submit', function (evt) {
+      window.upload(new FormData(bookingForm), function () {
+        if (!tegMain.querySelector('.success')) {
+          tegMain.appendChild(showSuccessNotice());
+          document.querySelector('body').addEventListener('keydown', successNoticenKeydownHandler);
+        }
+        hideSuccessNotice();
+        deactivatePage();
+      }, function () {
+        document.querySelector('.success').classList.add('hidden');
+        if (!tegMain.querySelector('.error')) {
+          tegMain.appendChild(showErrorNotice());
+        }
+        hideErrorNotice();
+        activatePage();
+      });
+      evt.preventDefault();
+
+      document.querySelector('body').addEventListener('keydown', errorNoticenKeydownHandler);
+    });
   }
 
   deactivatePage();
