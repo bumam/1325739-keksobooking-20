@@ -33,6 +33,7 @@
     var selectedRoom = roomNumberSelect.value;
     var capacityOptions = capacitySelect.querySelectorAll('option');
 
+
     if (selectedRoom === '1') {
       capacityOptions.forEach(function (elem) {
         elem.disabled = elem.value > 1 || elem.value === '0';
