@@ -18,7 +18,7 @@
   }
 
   function generateHotels(amount) {
-    var hotels = Array();
+    var hotels = [];
     for (var i = 0; i < amount; i++) {
       var hotel = {
         author: {
