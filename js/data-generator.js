@@ -7,7 +7,8 @@
   var descriptions = ['Очень красиво!', 'Очень хорошо!', 'Очень чисто!'];
   var images = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg',
     'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
-    'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+    'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+  ];
   var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 
   function getCuttedArray(source) {
@@ -17,7 +18,7 @@
   }
 
   function generateHotels(amount) {
-    var hotels = Array();
+    var hotels = [];
     for (var i = 0; i < amount; i++) {
       var hotel = {
         author: {

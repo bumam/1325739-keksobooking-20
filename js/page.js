@@ -19,9 +19,9 @@
     map.classList.add('map--faded');
     bookingForm.classList.add('ad-form--disabled');
 
-    for (var fieldset of bookingFormFieldsets) {
+    bookingFormFieldsets.forEach(function (fieldset) {
       fieldset.setAttribute('disabled', 'disabled');
-    }
+    });
 
     var coords = window.pin.getMainPinCenterCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
@@ -34,9 +34,9 @@
     map.classList.remove('map--faded');
     bookingForm.classList.remove('ad-form--disabled');
 
-    for (var fieldset of bookingFormFieldsets) {
+    bookingFormFieldsets.forEach(function (fieldset) {
       fieldset.removeAttribute('disabled');
-    }
+    });
 
     var coords = window.pin.getMainPinArrowCoordinates();
     addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
@@ -98,7 +98,6 @@
               MAX: 630
             }
           };
-          console.log(DragLimit.X.MAX)
 
           var Border = {
             TOP: DragLimit.Y.MIN - window.utils.MAIN_PIN_ARROW_HEIGHT,
@@ -117,7 +116,7 @@
         var onMouseUp = function (upEvt) {
           upEvt.preventDefault();
 
-          if (map.className === "map map--faded") {
+          if (map.className === 'map map--faded') {
             activatePage();
           }
 
