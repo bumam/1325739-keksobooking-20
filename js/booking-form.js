@@ -11,6 +11,10 @@
   var header = document.querySelector('#title');
   var mainPin = document.querySelector('.map__pin--main');
   var map = document.querySelector('.map');
+  var avatarPreview = document.querySelector('.ad-form-header__preview img');
+  var features = document.querySelector('.features');
+  var inputsFeatures = features.querySelectorAll('input');
+  var homePhotoPreview = document.querySelector('.ad-form__photo');
 
   function getTypeLabel(type) {
     if (type === 'flat') {
@@ -106,6 +110,11 @@
     timeOut.value = '12:00';
     roomNumberSelect.children[0].selected = true;
     capacitySelect.children[2].selected = true;
+    avatarPreview.src = 'img/muffin-grey.svg';
+    inputsFeatures.forEach(function (elem) {
+      elem.checked = false;
+    });
+    homePhotoPreview.innerHTML = '';
   }
 
   window.form = {
