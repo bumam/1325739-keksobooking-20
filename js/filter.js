@@ -23,7 +23,19 @@
 
   var AMOUNT_OF_SHOWED_PINS = 5;
 
+  function initFilter() {
+    selectFilters.forEach(function (elem) {
+      elem.addEventListener('change', function () {
+        window.debounce(updateOffers);
+      });
+    });
 
+    inputFilters.forEach(function (elem) {
+      elem.addEventListener('change', function () {
+        window.debounce(updateOffers);
+      });
+    });
+  }
 
   function hideExtraPins() {
     var createdPins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
@@ -35,22 +47,6 @@
     }
   }
 
-  function getCurrentFilterValue(filter, value) {
-    filter = value;
-    window.debounce(updateOffers);
-  }
-
-  selectFilters.forEach(function (elem) {
-    elem.addEventListener('change', function (evt) {
-      getCurrentFilterValue(elem.value, evt.target.value);
-    });
-  });
-
-  inputFilters.forEach(function (elem) {
-    elem.addEventListener('change', function () {
-      getCurrentFilterValue(elem, elem.checked);
-    });
-  });
 
   function filterAds(ad) {
     var adOffer = ad.offer;
@@ -113,6 +109,8 @@
       hideExtraPins();
     });
   }
+
+  initFilter();
 
   window.filter = {
     updateOffers: updateOffers,
