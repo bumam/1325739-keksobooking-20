@@ -23,6 +23,8 @@
 
   var AMOUNT_OF_SHOWED_PINS = 5;
 
+
+
   function hideExtraPins() {
     var createdPins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     var pinsAmount = document.querySelectorAll('.map__pin:not(.map__pin--main)').length;
