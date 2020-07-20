@@ -4,16 +4,22 @@
   var map = document.querySelector('.map');
   var before = document.querySelector('.map__filters-container');
   var mainPin = document.querySelector('.map__pin--main');
-  var bookingForm = document.documentElement.querySelector('.ad-form');
+  var bookingForm = document.querySelector('.ad-form');
   var mapSection = document.querySelector('.map__pins');
   var tegMain = document.querySelector('main');
   var cleanForm = document.querySelector('.ad-form__reset');
+  var filtersBlock = document.querySelector('.map__filters');
+  var selectFilters = filtersBlock.querySelectorAll('.map__filter');
+  var inputFilters = filtersBlock.querySelectorAll('.map__features input');
 
   var MAIN_PIN_ARROW_HEIGHT = 87;
+
+  var MAX_SIMILAR_PINS_AMOUNT = 5;
 
   var bookingFormFieldsets = bookingForm.querySelectorAll('fieldset');
   var addressInput = bookingForm.querySelector('#address');
   var parentDiv = before.parentNode;
+  var hotels = [];
 
   var startCoords = {
     x: null,
@@ -34,8 +40,8 @@
   var Border = {
     TOP: dragLimits.Y.MIN - MAIN_PIN_ARROW_HEIGHT,
     BOTTOM: dragLimits.Y.MAX - MAIN_PIN_ARROW_HEIGHT,
-    LEFT: dragLimits.X.MIN,
-    RIGHT: dragLimits.X.MAX - mainPin.offsetWidth
+    LEFT: dragLimits.X.MIN - mainPin.offsetWidth / 2,
+    RIGHT: dragLimits.X.MAX - mainPin.offsetWidth / 2
   };
 
   function onMouseMove(evt) {
@@ -63,15 +69,16 @@
     if (mainPinPosition.y >= Border.TOP && mainPinPosition.y <= Border.BOTTOM) {
       mainPin.style.top = mainPinPosition.y + 'px';
     }
+
+    var coords = window.pin.getCenterCoordinates();
+    addressInput.value = coords.x + ', ' + coords.y;
   }
 
   function onMouseUp(evt) {
     evt.preventDefault();
-
     if (map.className === 'map map--faded') {
       activatePage();
     }
-
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   }
@@ -81,17 +88,17 @@
     map.classList.add('map--faded');
     // блокирует форму
     bookingForm.classList.add('ad-form--disabled');
-    bookingFormFieldsets.forEach(function (elem) {
-      elem.setAttribute('disabled', 'disabled');
+    bookingFormFieldsets.forEach(function (element) {
+      element.setAttribute('disabled', 'disabled');
     });
 
-    window.filter.removeCards();
+    window.card.remove();
     window.filter.removePins();
 
-    window.form.cleanForm();
+    window.form.clean();
 
-    var coords = window.pin.getMainPinCenterCoordinates();
-    addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
+    var coords = window.pin.getCenterCoordinates();
+    addressInput.value = coords.x + ', ' + coords.y;
 
     // при нажатии на главный пин, активируем страницу
     mainPin.addEventListener('mousedown', function (evt) {
@@ -121,23 +128,25 @@
     map.classList.remove('map--faded');
     // отобразила форму
     bookingForm.classList.remove('ad-form--disabled');
-    bookingFormFieldsets.forEach(function (elem) {
-      elem.removeAttribute('disabled');
+    bookingFormFieldsets.forEach(function (element) {
+      element.removeAttribute('disabled');
     });
 
-    var coords = window.pin.getMainPinArrowCoordinates();
-    addressInput.value = 'x: ' + coords.x + ', y: ' + coords.y;
+    var coords = window.pin.getArrowCoordinates();
+    addressInput.value = coords.x + ', ' + coords.y;
+
 
     if (mapSection.children.length < 3) {
-      window.load('https://javascript.pages.academy/keksobooking/data', function (hotels) {
-        mapSection.appendChild(window.pin.createPins(hotels));
-        parentDiv.insertBefore(window.card.createCards(hotels), before);
-        window.card.hideCards();
-        window.filter.hideExtraPins();
+      window.load('https://javascript.pages.academy/keksobooking/data', function (data) {
+        var myHotels = data.slice();
+        myHotels.length = MAX_SIMILAR_PINS_AMOUNT;
+        mapSection.appendChild(window.pin.create(myHotels));
+        window.card.remove();
+        getHotels(data);
       });
     }
-    window.form.activateForm();
-    mapSection.addEventListener('click', window.card.showCard);
+    window.form.activate();
+    mapSection.addEventListener('click', showCard);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
 
     onSubmit();
@@ -146,6 +155,48 @@
       evt.preventDefault();
       deactivatePage();
     });
+
+    initFilter();
+  }
+
+  function getHotels(data) {
+    hotels = data.slice();
+    return hotels;
+  }
+
+  function initFilter() {
+    selectFilters.forEach(function (element) {
+      element.addEventListener('change', function () {
+        window.debounce(updateOffers);
+      });
+    });
+
+    inputFilters.forEach(function (element) {
+      element.addEventListener('change', function () {
+        window.debounce(updateOffers);
+      });
+    });
+  }
+
+  function updateOffers() {
+    var filteredAdvertisement = hotels.filter(window.filter.filterAdvertisement);
+    window.filter.removePins();
+    window.card.remove();
+    mapSection.appendChild(window.pin.create(filteredAdvertisement));
+    window.filter.hideExtraPins();
+  }
+
+
+  function showCard(evt) {
+    var filteredAdvertisement = hotels.filter(window.filter.filterAdvertisement);
+    window.card.remove();
+    if (evt.target.dataset.pinId !== undefined) {
+      window.pin.remove();
+      evt.target.classList.add('map__pin--active');
+      parentDiv.insertBefore(window.card.create(filteredAdvertisement[evt.target.dataset.pinId]), before);
+      map.addEventListener('click', window.card.closeOffer);
+      document.addEventListener('keydown', window.card.closeOffer);
+    }
   }
 
   function mainPinKeydownHandler(evt) {
@@ -200,7 +251,7 @@
   function hideErrorNotice() {
     document.querySelector('.error__button').addEventListener('click', function () {
       document.querySelector('.error').classList.add('hidden');
-      window.form.cleanForm();
+      window.form.clean();
     });
   }
 

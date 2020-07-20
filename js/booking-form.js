@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var bookingForm = document.documentElement.querySelector('.ad-form');
+  var bookingForm = document.querySelector('.ad-form');
   var priceInput = bookingForm.querySelector('#price');
   var capacitySelect = bookingForm.querySelector('#capacity');
   var typeSelect = document.querySelector('#type');
@@ -16,14 +16,24 @@
   var inputsFeatures = features.querySelectorAll('input');
   var homePhotoPreview = document.querySelector('.ad-form__photo');
 
+  var typeBungalo = 'bungalo';
+  var typeFlat = 'flat';
+  var typeHouse = 'house';
+  var typePalace = 'palace';
+
+  var oneRoom = 1;
+  var twoRooms = 2;
+  var threeRooms = 3;
+  var manyRooms = 100;
+
   function getTypeLabel(type) {
-    if (type === 'flat') {
+    if (type === typeFlat) {
       return 'Квартира';
-    } else if (type === 'bungalo') {
+    } else if (type === typeBungalo) {
       return 'Бунгало';
-    } else if (type === 'house') {
+    } else if (type === typeHouse) {
       return 'Дом';
-    } else if (type === 'palace') {
+    } else if (type === typePalace) {
       return 'Дворец';
     }
     return type;
@@ -34,30 +44,30 @@
     var capacityOptions = capacitySelect.querySelectorAll('option');
 
 
-    if (selectedRoom === '1') {
-      capacityOptions.forEach(function (elem) {
-        elem.disabled = elem.value > 1 || elem.value === '0';
+    if (selectedRoom === oneRoom) {
+      capacityOptions.forEach(function (element) {
+        element.disabled = element.value > 1 || element.value === '0';
       });
       capacitySelect.children[2].selected = true;
     }
 
-    if (selectedRoom === '2') {
-      capacityOptions.forEach(function (elem) {
-        elem.disabled = elem.value > 2 || elem.value === '0';
+    if (selectedRoom === twoRooms) {
+      capacityOptions.forEach(function (element) {
+        element.disabled = element.value > 2 || element.value === '0';
       });
       capacitySelect.children[1].selected = true;
     }
 
-    if (selectedRoom === '3') {
-      capacityOptions.forEach(function (elem) {
-        elem.disabled = elem.value === '0';
+    if (selectedRoom === threeRooms) {
+      capacityOptions.forEach(function (element) {
+        element.disabled = element.value === '0';
       });
       capacitySelect.children[0].selected = true;
     }
 
-    if (selectedRoom === '100') {
-      capacityOptions.forEach(function (elem) {
-        elem.disabled = elem.value !== '0';
+    if (selectedRoom === manyRooms) {
+      capacityOptions.forEach(function (element) {
+        element.disabled = element.value !== '0';
       });
       capacitySelect.children[3].selected = true;
     }
@@ -87,7 +97,7 @@
     }
   }
 
-  function activateForm() {
+  function activate() {
     setPriceRestrictions();
     validateGuestsLimit();
     typeSelect.addEventListener('change', setPriceRestrictions);
@@ -100,7 +110,7 @@
     document.querySelector('#timeout').value = evt.target.value;
   }
 
-  function cleanForm() {
+  function clean() {
     header.value = '';
     typeSelect.value = 'flat';
     priceInput.value = '';
@@ -112,15 +122,15 @@
     roomNumberSelect.children[0].selected = true;
     capacitySelect.children[2].selected = true;
     avatarPreview.src = 'img/muffin-grey.svg';
-    inputsFeatures.forEach(function (elem) {
-      elem.checked = false;
+    inputsFeatures.forEach(function (element) {
+      element.checked = false;
     });
     homePhotoPreview.innerHTML = '';
   }
 
   window.form = {
-    cleanForm: cleanForm,
-    activateForm: activateForm,
+    clean: clean,
+    activate: activate,
     getTypeLabel: getTypeLabel,
     validateGuestsLimit: validateGuestsLimit,
     setPriceRestrictions: setPriceRestrictions,
