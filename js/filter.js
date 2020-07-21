@@ -17,18 +17,6 @@
   var PRICE_LOW = 10000;
   var PRICE_MIDDLE = 50000;
 
-  var AMOUNT_OF_SHOWED_PINS = 5;
-
-  function hideExtraPins() {
-    var createdPins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
-    var pinsAmount = document.querySelectorAll('.map__pin:not(.map__pin--main)').length;
-    if (pinsAmount > AMOUNT_OF_SHOWED_PINS) {
-      for (var i = AMOUNT_OF_SHOWED_PINS; i < pinsAmount; i++) {
-        createdPins[i].classList.add('hidden');
-      }
-    }
-  }
-
   function filterAdvertisement(advertisement) {
     var advertisementOffer = advertisement.offer;
     var advertisementFeatures = advertisementOffer.features;
@@ -73,7 +61,6 @@
   }
 
   window.filter = {
-    hideExtraPins: hideExtraPins,
     filterAdvertisement: filterAdvertisement,
     removePins: removePins
   };

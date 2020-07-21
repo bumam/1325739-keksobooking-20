@@ -12,7 +12,7 @@
   var selectFilters = filtersBlock.querySelectorAll('.map__filter');
   var inputFilters = filtersBlock.querySelectorAll('.map__features input');
 
-  var MAIN_PIN_ARROW_HEIGHT = 87;
+  var TAIL_HEIGHT = 13;
 
   var MAX_SIMILAR_PINS_AMOUNT = 5;
 
@@ -29,39 +29,37 @@
   var dragLimits = {
     X: {
       MIN: 0,
-      MAX: mapSection.offsetWidth
+      MAX: mapSection.offsetWidth,
     },
     Y: {
-      MIN: 230,
-      MAX: 630
-    }
+      MIN: 130,
+      MAX: 630,
+    },
   };
 
   var Border = {
-    TOP: dragLimits.Y.MIN - MAIN_PIN_ARROW_HEIGHT,
-    BOTTOM: dragLimits.Y.MAX - MAIN_PIN_ARROW_HEIGHT,
+    TOP: dragLimits.Y.MIN - mainPin.offsetHeight - TAIL_HEIGHT,
+    BOTTOM: dragLimits.Y.MAX - mainPin.offsetHeight - TAIL_HEIGHT,
     LEFT: dragLimits.X.MIN - mainPin.offsetWidth / 2,
-    RIGHT: dragLimits.X.MAX - mainPin.offsetWidth / 2
+    RIGHT: dragLimits.X.MAX - mainPin.offsetWidth / 2,
   };
 
   function onMouseMove(evt) {
     evt.preventDefault();
-
     var shift = {
       x: startCoords.x - evt.clientX,
-      y: startCoords.y - evt.clientY
+      y: startCoords.y - evt.clientY,
     };
 
     var mainPinPosition = {
       x: mainPin.offsetLeft - shift.x,
-      y: mainPin.offsetTop - shift.y
+      y: mainPin.offsetTop - shift.y,
     };
 
     startCoords = {
       x: evt.clientX,
-      y: evt.clientY
+      y: evt.clientY,
     };
-
 
     if (mainPinPosition.x >= Border.LEFT && mainPinPosition.x <= Border.RIGHT) {
       mainPin.style.left = mainPinPosition.x + 'px';
@@ -70,9 +68,18 @@
       mainPin.style.top = mainPinPosition.y + 'px';
     }
 
+  }
+
+  function getRightCoordsDeactive() {
     var coords = window.pin.getCenterCoordinates();
     addressInput.value = coords.x + ', ' + coords.y;
   }
+
+  function getRightCoordsActive() {
+    var coords = window.pin.getArrowCoordinates();
+    addressInput.value = coords.x + ', ' + coords.y;
+  }
+
 
   function onMouseUp(evt) {
     evt.preventDefault();
@@ -96,9 +103,7 @@
     window.filter.removePins();
 
     window.form.clean();
-
-    var coords = window.pin.getCenterCoordinates();
-    addressInput.value = coords.x + ', ' + coords.y;
+    getRightCoordsDeactive();
 
     // при нажатии на главный пин, активируем страницу
     mainPin.addEventListener('mousedown', function (evt) {
@@ -107,12 +112,12 @@
 
         startCoords = {
           x: evt.clientX,
-          y: evt.clientY
+          y: evt.clientY,
         };
 
         document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mousemove', getRightCoordsDeactive);
         document.addEventListener('mouseup', onMouseUp);
-
       }
     });
     mainPin.addEventListener('keydown', mainPinKeydownHandler);
@@ -132,15 +137,14 @@
       element.removeAttribute('disabled');
     });
 
-    var coords = window.pin.getArrowCoordinates();
-    addressInput.value = coords.x + ', ' + coords.y;
-
 
     if (mapSection.children.length < 3) {
       window.load('https://javascript.pages.academy/keksobooking/data', function (data) {
-        var myHotels = data.slice();
-        myHotels.length = MAX_SIMILAR_PINS_AMOUNT;
-        mapSection.appendChild(window.pin.create(myHotels));
+        for (var i = 0; i < Math.min(data.length, MAX_SIMILAR_PINS_AMOUNT); i++) {
+          mapSection.appendChild(window.pin.create(data[i]));
+        }
+        setPinId();
+
         window.card.remove();
         getHotels(data);
       });
@@ -148,6 +152,7 @@
     window.form.activate();
     mapSection.addEventListener('click', showCard);
     mainPin.removeEventListener('keydown', mainPinKeydownHandler);
+    document.addEventListener('mousemove', getRightCoordsActive);
 
     onSubmit();
 
@@ -182,10 +187,19 @@
     var filteredAdvertisement = hotels.filter(window.filter.filterAdvertisement);
     window.filter.removePins();
     window.card.remove();
-    mapSection.appendChild(window.pin.create(filteredAdvertisement));
-    window.filter.hideExtraPins();
+
+    for (var i = 0; i < Math.min(filteredAdvertisement.length, MAX_SIMILAR_PINS_AMOUNT); i++) {
+      mapSection.appendChild(window.pin.create(filteredAdvertisement[i]));
+    }
+    setPinId();
   }
 
+  function setPinId() {
+    var pins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+    pins.forEach(function (item, j) {
+      item.querySelector('img').dataset.pinId = j;
+    });
+  }
 
   function showCard(evt) {
     var filteredAdvertisement = hotels.filter(window.filter.filterAdvertisement);
@@ -277,6 +291,5 @@
       document.querySelector('body').addEventListener('keydown', errorNoticenKeydownHandler);
     });
   }
-
   deactivatePage();
 })();
